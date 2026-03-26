@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="TDE.png" type="image/x-icon">
+    <title>THEDUBIAEXPERIENCE</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Extra styles for beautiful glassmorphic form inputs */
+        .form-group {
+            position: relative;
+            margin-bottom: 1.8rem;
+            width: 100%;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 10px;
+            color: #fff;
+            outline: none;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+            background: rgba(15, 23, 42, 0.85);
+        }
+        .form-group label {
+            position: absolute;
+            left: 16px;
+            top: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .form-group input:focus ~ label,
+        .form-group input:not(:placeholder-shown) ~ label,
+        .form-group select:focus ~ label,
+        .form-group select:not(:placeholder-shown) ~ label,
+        .form-group textarea:focus ~ label,
+        .form-group textarea:not(:placeholder-shown) ~ label {
+            top: -8px;
+            left: 12px;
+            font-size: 12px;
+            color: #3b82f6;
+            background: rgba(15, 23, 42, 0.9);
+            padding: 0 6px;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+        /* Make select look consistent */
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23fff' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+        /* Conditional fields */
+        .conditional {
+            display: none;
+            margin-top: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1>Book Service with THEDUBIAEXPERIENCE</h1>
+        <div class="wrapper">
+            <h1 class="title">Welcome</h1>
+            <h2 id="current-datetime"><br></h2>
+            <br>
+            <p style="text-align: center; max-width: 800px; margin: 0 auto 2rem auto; line-height: 1.6; color: #e5e7eb;">
+                Fill out the form below to book the pianist for your event. We provide
+                professional piano performance services for a variety of occasions — church services,
+                weddings, corporate events, private parties, concerts, and more. Our
+                experienced and highly skilled pianists will deliver a beautiful, expressive,
+                and memorable performance tailored to your specific needs and the atmosphere
+                of your occasion.
+            </p>
+            <form id="bookingForm" style="max-width: 620px; margin: 0 auto;">
+                
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="" required>
+                    <label for="name">Full Name</label>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="" required>
+                    <label for="email">Email Address</label>
+                </div>
+                <div class="form-group">
+                    <input type="tel" name="phone" placeholder="" required>
+                    <label for="phone">Phone Number</label>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="location" placeholder="" required>
+                    <label for="location">Event Location</label>
+                </div>
+                <!-- Main Service Type -->
+                <div class="form-group">
+                    <select id="serviceType" name="serviceType" required onchange="handleServiceType()">
+                        <option value="" disabled selected>Select Service Type</option>
+                        <option value="live">Live Performances</option>
+                        <option value="private">Private Sessions</option>
+                        <option value="studio">Studio Recordings</option>
+                        <option value="touring">Touring Keyboardist / Music Director Support</option>
+                        <option value="production">Music Production (Keyboard-driven tracks)</option>
+                        <option value="arrangement">Song Arrangement & Reharmonization</option>
+                        <option value="remote">Remote Work Sessions (Online Recording)</option>
+                        <option value="covers">Custom Piano Covers / Instrumentals</option>
+                        <option value="jingles">Jingles & Commercial Music</option>
+                        <option value="rehearsal">Rehearsal Sessions</option>
+                        <option value="audition">Audition / Demo Recording Support</option>
+                        <option value="backing">Backing Tracks</option>
+                        <option value="setup">Keyboard Setup & Consultation (Gear + Sound)</option>
+                        <option value="livepack">Live Performance Pack (rehearsal + gig)</option>
+                        <option value="sundaypack">Sunday Service Pack (rehearsals + soundcheck + vocal arrangements)</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <label for="serviceType">Service Type</label>
+                </div>
+                <!-- Live Performance Type -->
+                <div class="form-group conditional" id="livePerformanceGroup">
+                    <select id="livePerformancetype" name="livePerformancetype" onchange="handleLiveOther()">
+                        <option value="" disabled selected>Select Live Performance Type</option>
+                        <option value="band">Bands (Rehearsals + Gigs)</option>
+                        <option value="solo">Solo Artist (Rehearsals + Gigs)</option>
+                        <option value="church">Church Service (Rehearsals + Sunday Services)</option>
+                        <option value="wedding">Wedding Performances (Ceremony + Reception)</option>
+                        <option value="corporate">Corporate Event Performances</option>
+                        <option value="finedining">Fine Dining / Lounge Performances</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <label for="livePerformancetype">Live Performance Type</label>
+                </div>
+                
+                <!-- Studio Recording Type -->
+                <div class="form-group conditional" id="studioGroup">
+                    <select id="studioRecordingType" name="studioRecordingType" onchange="handleStudioOther()">
+                        <option value="" disabled selected>Select Studio Recording Type</option>
+                        <option value="band">Record Piano</option>
+                        <option value="solo">Record Organ</option>
+                        <option value="church">Record Synth</option>
+                        <option value="wedding">Record pads for artists’ tracks</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <label for="studioRecordingType">Studio Recording Type</label>
+                </div>
+                <!-- Other for Service Type -->
+                <div class="form-group conditional" id="serviceOtherGroup">
+                    <textarea id="serviceOtherDesc" name="serviceOtherDesc" placeholder="If you selected 'Other' for Service Type, please provide details here."></textarea>
+                </div>
+                <!-- Other for Live Performance -->
+                <div class="form-group conditional" id="liveOtherGroup">
+                    <textarea id="liveOtherDesc" name="liveOtherDesc" placeholder="If you selected 'Other' for Live Performance Type, please provide details here."></textarea>
+                </div>
+                
+                <!-- Other for Studio Recording -->
+                <div class="form-group conditional" id="studioOtherGroup">
+                    <textarea id="studioOtherDesc" name="studioOtherDesc" placeholder="If you selected 'Other' for Studio Recording Type, please provide details here."></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="date" name="date" placeholder="Select Date" required>
+                    <label for="date">Preferred Date</label>
+                </div>
+                <div class="form-group">
+                    <input type="time" name="time" placeholder="Select Time" required>
+                    <label for="time">Preferred Time</label>
+                </div>
+                <div class="form-group">
+                    <input type="time" name="endTime" placeholder="Select End Time" required>
+                    <label for="endTime">End Time</label>
+                </div>
+                <div class="form-group">
+                    <textarea id="generalMessage" name="message" placeholder=" "></textarea>
+                    <label for="generalMessage">Optional Message</label>
+                </div>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button type="submit">Book Service</button>
+                </div>
+            </form>
+            <p style="text-align: center; margin-top: 2rem; color: #e5e7eb;">
+                Also feel free to reach out to us through <a href="mailto:thedubiaexperience@gmail.com" style="color: #3b82f6; text-decoration: none;">thedubiaexperience@gmail.com</a> if you have any questions!
+            </p>
+        </div>
+        <hr>
+        <footer>
+            <p>Copyright &copy; 2026 THEDUBIAEXPERIENCE. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Notification Container (Only addition) -->
+    <div id="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
