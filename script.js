@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isSuccess = response.ok;
                 const message = result.message ||
                     (isSuccess 
-                        ? "🎉 Booking received successfully! A confirmation email has been sent to your email address." 
+                        ? "🎉 Booking received successfully! A confirmation email has been sent to your email address. Incase you didn't receive it, please check your spam folder." 
                         : "Something went wrong. Please try again.");
 
                 showNotification(message, isSuccess ? "success" : "error");
