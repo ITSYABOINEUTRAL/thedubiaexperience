@@ -53,6 +53,28 @@ function handleServiceType() {
     }
 }
 
+// ==================== LIVE PERFORMANCE CONDITIONAL ====================
+function handleLiveOther() {
+    const liveType = document.getElementById("livePerformancetype")?.value;
+    const liveOtherGroup = document.getElementById("liveOtherGroup");
+
+    if (!liveOtherGroup) return;
+
+    liveOtherGroup.style.display =
+        liveType === "other" ? "block" : "none";
+}
+
+
+// ==================== STUDIO CONDITIONAL ====================
+function handleStudioOther() {
+    const studioType = document.getElementById("studioRecordingType")?.value;
+    const studioOtherGroup = document.getElementById("studioOtherGroup");
+
+    if (!studioOtherGroup) return;
+
+    studioOtherGroup.style.display =
+        studioType === "other" ? "block" : "none";
+}
 
 // ==================== NOTIFICATION FUNCTION ====================
 function showNotification(message, type = "success") {
