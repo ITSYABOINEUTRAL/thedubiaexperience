@@ -5,23 +5,66 @@ function updateDateTime() {
     const formattedDate = now.toLocaleDateString("en-ZA", optionsDate);
     const optionsTime = { hour: "2-digit", minute: "2-digit", hour12: true };
     const formattedTime = now.toLocaleTimeString("en-ZA", optionsTime);
-    document.getElementById("current-datetime").innerHTML =
-        `${formattedDate} <br> ${formattedTime}`;
+
+    const dateTimeElement = document.getElementById("current-datetime");
+    if (dateTimeElement) {
+        dateTimeElement.innerHTML = `${formattedDate} <br> ${formattedTime}`;
+    }
 }
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// ==================== CONDITIONAL FIELDS (booking only) ====================
+// ==================== CONDITIONAL FIELDS ====================
 function handleServiceType() {
-    const service = document.getElementById('serviceType')?.value;
+    const service = document.getElementById("serviceType")?.value;
+
+    const liveGroup = document.getElementById("livePerformanceGroup");
+    const studioGroup = document.getElementById("studioGroup");
+    const serviceOtherGroup = document.getElementById("serviceOtherGroup");
+
     if (!service) return;
-    // ... your original conditional logic ...
+
+    if (liveGroup) liveGroup.style.display = service === "live" ? "block" : "none";
+    if (studioGroup) studioGroup.style.display = service === "studio" ? "block" : "none";
+    if (serviceOtherGroup) serviceOtherGroup.style.display = service === "other" ? "block" : "none";
 }
 
-// ==================== SUBMISSION HANDLERS ====================
+// ==================== NOTIFICATION FUNCTION ====================
+function showNotification(message, type = "success") {
+    const container = document.getElementById("notification-container");
+
+    if (!container) {
+        alert(message);
+        return;
+    }
+
+    const notification = document.createElement("div");
+
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 16px 20px;
+        border-radius: 10px;
+        color: white;
+        font-family: Poppins, sans-serif;
+        font-size: 14px;
+        max-width: 380px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        background: ${type === "success" ? "#16a34a" : "#dc2626"};
+    `;
+
+    notification.textContent = message;
+    container.appendChild(notification);
+
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
+// ==================== BOOKING SUBMISSION ====================
 async function handleBookingSubmission(e, data) {
-    // ← your original booking submission logic (exactly as before)
-    // I moved it here so it stays 100% unchanged
     try {
         const response = await fetch("https://thedubiaexperience-backend.onrender.com/book", {
             method: "POST",
@@ -29,36 +72,34 @@ async function handleBookingSubmission(e, data) {
             body: JSON.stringify(data)
         });
 
-        const rawText = await response.text();
-        console.log("Raw server response:", rawText);
-        console.log("HTTP Status:", response.status, "OK:", response.ok);
+        const result = await response.json();
 
-        let result = {};
-        try {
-            if (rawText.trim()) result = JSON.parse(rawText);
-        } catch (parseErr) {}
+        showNotification(
+            result.message || "Booking submitted successfully!",
+            response.ok ? "success" : "error"
+        );
 
-        const isSuccess = response.ok;
-        const message = result.message || (isSuccess 
-            ? "🎉 Booking received successfully! A confirmation email has been sent to your email address. Incase you didn't receive it, please check your spam folder." 
-            : "Something went wrong. Please try again.");
-
-        showNotification(message, isSuccess ? "success" : "error");
-
-        if (isSuccess) {
+        if (response.ok) {
             e.target.reset();
-            document.getElementById('livePerformanceGroup').style.display = 'none';
-            document.getElementById('studioGroup').style.display = 'none';
-            document.getElementById('serviceOtherGroup').style.display = 'none';
-            document.getElementById('liveOtherGroup').style.display = 'none';
-            document.getElementById('studioOtherGroup').style.display = 'none';
+
+            [
+                "livePerformanceGroup",
+                "studioGroup",
+                "serviceOtherGroup",
+                "liveOtherGroup",
+                "studioOtherGroup"
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = "none";
+            });
         }
     } catch (error) {
-        console.error("Fetch error:", error);
-        showNotification("Failed to submit booking request. Please check your connection and try again.", "error");
+        console.error(error);
+        showNotification("Failed to submit booking request.", "error");
     }
 }
 
+// ==================== NEWSLETTER SUBMISSION ====================
 async function handleNewsletterSubmission(e, data) {
     try {
         const response = await fetch("https://thedubiaexperience-backend.onrender.com/send-email", {
@@ -67,50 +108,40 @@ async function handleNewsletterSubmission(e, data) {
             body: JSON.stringify(data)
         });
 
-        const rawText = await response.text();
-        console.log("Raw server response:", rawText);
-        console.log("HTTP Status:", response.status, "OK:", response.ok);
+        const result = await response.json();
 
-        let result = {};
-        try {
-            if (rawText.trim()) result = JSON.parse(rawText);
-        } catch (parseErr) {}
+        showNotification(
+            result.message || "Email sent successfully!",
+            response.ok ? "success" : "error"
+        );
 
-        const isSuccess = response.ok;
-        const message = result.message || (isSuccess 
-            ? "🎉 Email sent successfully!" 
-            : "Something went wrong. Please try again.");
-
-        showNotification(message, isSuccess ? "success" : "error");
-
-        if (isSuccess) {
+        if (response.ok) {
             e.target.reset();
         }
     } catch (error) {
-        console.error("Fetch error:", error);
-        showNotification("Failed to send email. Please check your connection and try again.", "error");
+        console.error(error);
+        showNotification("Failed to send email.", "error");
     }
 }
 
-// ==================== MAIN INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Only run booking conditional logic on the booking page
-    if (document.getElementById('serviceType')) {
+// ==================== MAIN ====================
+document.addEventListener("DOMContentLoaded", () => {
+    if (document.getElementById("serviceType")) {
         handleServiceType();
     }
 
-    const bookingForm = document.getElementById("bookingForm");
-    
-    if (bookingForm) {
-        bookingForm.addEventListener("submit", async (e) => {
+    const form = document.getElementById("bookingForm");
+
+    if (form) {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
 
-            // Detect which form this is
-            const isNewsletter = data.header !== undefined;
+            const isNewsletter =
+                document.querySelector('input[name="subject"]') &&
+                !document.querySelector('input[name="name"]');
 
             if (isNewsletter) {
                 await handleNewsletterSubmission(e, data);
@@ -120,8 +151,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-// ==================== NOTIFICATION FUNCTION ====================
-function showNotification(message, type = "success") {
-    // ← your original notification function (unchanged)
-}
