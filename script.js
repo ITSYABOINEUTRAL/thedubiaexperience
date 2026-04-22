@@ -59,46 +59,48 @@ function handleStudioOther() {
 }
 
 // ==================== IMPROVED NOTIFICATION (now appends to body) ====================
+// ==================== IMPROVED NOTIFICATION (Centered Pop-up) ====================
 function showNotification(message, type = "success") {
     console.log(`🔔 Notification triggered: ${message} (${type})`);
 
+    // 1. Find or create the overlay container
+    let container = document.getElementById("notification-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "notification-container";
+        document.body.appendChild(container);
+    }
+
+    // 2. Create the notification box
     const notification = document.createElement("div");
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 16px 20px;
-        border-radius: 10px;
-        color: white;
-        font-family: Poppins, sans-serif;
-        font-size: 14px;
-        max-width: 380px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-        background: ${type === "success" ? "#16a34a" : "#dc2626"};
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    `;
-
+    // Apply the classes defined in your style.css
+    notification.className = `notification ${type}`;
+    
     notification.innerHTML = `
-        ${message}
-        <span style="font-size: 22px; font-weight: bold; line-height: 1; opacity: 0.9;">&times;</span>
+        <div style="margin-bottom: 10px;">${message}</div>
+        <div style="font-size: 12px; opacity: 0.7;">(Click to dismiss)</div>
     `;
 
-    document.body.appendChild(notification);
+    // 3. Clear any old notifications and add the new one
+    container.innerHTML = ""; 
+    container.appendChild(notification);
 
-    // Click anywhere on notification to dismiss
-    notification.addEventListener("click", () => notification.remove());
+    // 4. Show the container (triggers the flex display and animation)
+    container.classList.add("show");
+
+    // 5. Dismiss Logic
+    const dismiss = () => {
+        container.classList.remove("show");
+        // Small delay to allow the fade-out if you add one later
+        setTimeout(() => { notification.remove(); }, 300);
+    };
+
+    // Click to dismiss
+    notification.addEventListener("click", dismiss);
 
     // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) notification.remove();
-    }, 5000);
+    setTimeout(dismiss, 5000);
 }
-
 // ==================== BOOKING SUBMISSION ====================
 async function handleBookingSubmission(e, data) {
     try {
