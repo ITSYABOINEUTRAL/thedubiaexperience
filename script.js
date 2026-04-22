@@ -29,7 +29,6 @@ function updateDateTime() {
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-
 // ==================== CONDITIONAL FIELDS ====================
 function handleServiceType() {
     const service = document.getElementById("serviceType")?.value;
@@ -40,53 +39,30 @@ function handleServiceType() {
 
     if (!service) return;
 
-    if (liveGroup) {
-        liveGroup.style.display = service === "live" ? "block" : "none";
-    }
-
-    if (studioGroup) {
-        studioGroup.style.display = service === "studio" ? "block" : "none";
-    }
-
-    if (serviceOtherGroup) {
-        serviceOtherGroup.style.display = service === "other" ? "block" : "none";
-    }
+    if (liveGroup) liveGroup.style.display = service === "live" ? "block" : "none";
+    if (studioGroup) studioGroup.style.display = service === "studio" ? "block" : "none";
+    if (serviceOtherGroup) serviceOtherGroup.style.display = service === "other" ? "block" : "none";
 }
 
-// ==================== LIVE PERFORMANCE CONDITIONAL ====================
 function handleLiveOther() {
     const liveType = document.getElementById("livePerformancetype")?.value;
     const liveOtherGroup = document.getElementById("liveOtherGroup");
-
     if (!liveOtherGroup) return;
-
-    liveOtherGroup.style.display =
-        liveType === "other" ? "block" : "none";
+    liveOtherGroup.style.display = liveType === "other" ? "block" : "none";
 }
 
-
-// ==================== STUDIO CONDITIONAL ====================
 function handleStudioOther() {
     const studioType = document.getElementById("studioRecordingType")?.value;
     const studioOtherGroup = document.getElementById("studioOtherGroup");
-
     if (!studioOtherGroup) return;
-
-    studioOtherGroup.style.display =
-        studioType === "other" ? "block" : "none";
+    studioOtherGroup.style.display = studioType === "other" ? "block" : "none";
 }
 
-// ==================== NOTIFICATION FUNCTION ====================
+// ==================== IMPROVED NOTIFICATION (now appends to body) ====================
 function showNotification(message, type = "success") {
-    const container = document.getElementById("notification-container");
-
-    if (!container) {
-        alert(message);
-        return;
-    }
+    console.log(`🔔 Notification triggered: ${message} (${type})`);
 
     const notification = document.createElement("div");
-
     notification.style.cssText = `
         position: fixed;
         top: 20px;
@@ -100,16 +76,28 @@ function showNotification(message, type = "success") {
         max-width: 380px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.25);
         background: ${type === "success" ? "#16a34a" : "#dc2626"};
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
     `;
 
-    notification.textContent = message;
-    container.appendChild(notification);
+    notification.innerHTML = `
+        ${message}
+        <span style="font-size: 22px; font-weight: bold; line-height: 1; opacity: 0.9;">&times;</span>
+    `;
 
+    document.body.appendChild(notification);
+
+    // Click anywhere on notification to dismiss
+    notification.addEventListener("click", () => notification.remove());
+
+    // Auto-dismiss after 5 seconds
     setTimeout(() => {
-        notification.remove();
+        if (notification.parentNode) notification.remove();
     }, 5000);
 }
-
 
 // ==================== BOOKING SUBMISSION ====================
 async function handleBookingSubmission(e, data) {
@@ -118,41 +106,31 @@ async function handleBookingSubmission(e, data) {
 
         const response = await fetch("https://thedubiaexperience-backend.onrender.com/book", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
 
         const result = await response.json();
-
         console.log("Booking response:", result);
 
         showNotification(
-            result.message || "Booking submitted successfully!",
+            result.message || "🎉 Booking received successfully! A confirmation email has been sent to your email address.",
             response.ok ? "success" : "error"
         );
 
         if (response.ok) {
             e.target.reset();
-
-            [
-                "livePerformanceGroup",
-                "studioGroup",
-                "serviceOtherGroup",
-                "liveOtherGroup",
-                "studioOtherGroup"
-            ].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = "none";
-            });
+            ["livePerformanceGroup", "studioGroup", "serviceOtherGroup", "liveOtherGroup", "studioOtherGroup"]
+                .forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = "none";
+                });
         }
     } catch (error) {
         console.error("Booking error:", error);
         showNotification("Failed to submit booking request.", "error");
     }
 }
-
 
 // ==================== NEWSLETTER SUBMISSION ====================
 async function handleNewsletterSubmission(e, data) {
@@ -161,18 +139,15 @@ async function handleNewsletterSubmission(e, data) {
 
         const response = await fetch("https://thedubiaexperience-backend.onrender.com/send-email", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         });
 
         const result = await response.json();
-
         console.log("Email response:", result);
 
         showNotification(
-            result.message || "Email sent successfully!",
+            result.message || "🎉 Email sent successfully!",
             response.ok ? "success" : "error"
         );
 
@@ -185,10 +160,12 @@ async function handleNewsletterSubmission(e, data) {
     }
 }
 
-
 // ==================== MAIN ====================
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("✅ DOMContentLoaded fired - script.js loaded successfully");
+
     if (document.getElementById("serviceType")) {
+        console.log("Booking page detected - initializing conditional fields");
         handleServiceType();
     }
 
@@ -196,24 +173,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const newsletterForm = document.getElementById("newsletterForm");
 
     if (bookingForm) {
+        console.log("Booking form found - attaching submit listener");
         bookingForm.addEventListener("submit", async (e) => {
+            console.log("🚀 Booking form submitted");
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-
             await handleBookingSubmission(e, data);
         });
+    } else {
+        console.log("No bookingForm on this page");
     }
 
     if (newsletterForm) {
+        console.log("Newsletter form found - attaching submit listener");
         newsletterForm.addEventListener("submit", async (e) => {
+            console.log("🚀 Newsletter form submitted");
             e.preventDefault();
-
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData.entries());
-
             await handleNewsletterSubmission(e, data);
         });
+    } else {
+        console.log("No newsletterForm on this page");
     }
 });
